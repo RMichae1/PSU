@@ -5,34 +5,53 @@ from SearchAlgorithms import HillClimbing, FCHillClimbing, RandomHillClimbing, S
 
 
 class Frontend(QtWidgets.QWidget):
-    def __init__(self, algorithm_list):
+    def __init__(self, algorithm_list, orders, problems):
         super().__init__()
         self.algorithm_list = algorithm_list
+        self.orders = orders
+        self.problems = problems
         self.algorithm_names = [str(alg) for alg in self.algorithm_list]
+
         self.start_button = QtWidgets.QPushButton("Run Algorithm")
         self.text = QtWidgets.QLabel("GROUP ALPHA")
 
-        # make a dropdown for the algorithms
-        self.selectionBox = QtWidgets.QComboBox()
-        self.selectionBox.addItems(self.algorithm_names)
-        #self.selectionBox.curr
+        # make all dropdowns for, algorithms, orders and problemspace
+        self.algorithmSelectionBox = QtWidgets.QComboBox()
+        self.orderSelectionBox = QtWidgets.QComboBox()
+        self.problemSelectionBox = QtWidgets.QComboBox()
+
+        self.algorithmSelectionBox.addItems(self.algorithm_names)
+        self.orderSelectionBox.addItems(self.orders)
+        self.problemSelectionBox.addItems(self.problems)
 
         self.text.setAlignment(QtCore.Qt.AlignCenter)
 
-        self.layout = QtWidgets.QVBoxLayout()
-        self.layout.addWidget(self.text)
-        self.layout.addWidget(self.selectionBox)
-        self.layout.addWidget(self.start_button)
-        self.setLayout(self.layout)
-        #self.start_button.clicked.connect(self.run_search(self.selectionBox.))
+        # make console like output
+        #self.textOut = QTextEdit(   )
 
-    def run_search(self):
-        pass
+        self.layout = QtWidgets.QVBoxLayout()
+        self.add_widgets()
+        self.setLayout(self.layout)
+
+        active_algorithm_id = self.algorithmSelectionBox.currentIndex()
+        self.start_button.clicked.connect(self.run_search(active_algorithm_id))
+
+    def add_widgets(self):
+        self.layout.addWidget(self.text)
+        self.layout.addWidget(self.problemSelectionBox)
+        self.layout.addWidget(self.orderSelectionBox)
+        self.layout.addWidget(self.algorithmSelectionBox)
+        self.layout.addWidget(self.start_button)
+
+    def run_search(self, algorithm_id):
+        print(self.algorithm_list[algorithm_id].search())
 
 
 if __name__ == "__main__":
     # read input files and extract order and problem-space
     reader = Reader()
+    order_list = reader.get_files_like("order")
+    problem_list = reader.get_files_like("problem")
     orders = reader.get_order()
     problem_space = reader.get_space()
 
@@ -45,7 +64,9 @@ if __name__ == "__main__":
     algs = [hill_climber, fc_climber, random_climber, annealer, beam_searcher]
 
     app = QtWidgets.QApplication([])
-    gui = Frontend(algs)
+    gui = Frontend(algorithm_list=algs,
+                   orders=order_list,
+                   problems=problem_list)
     gui.resize(800, 600)
     gui.show()
     sys.exit(app.exec_())

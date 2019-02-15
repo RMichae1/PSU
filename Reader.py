@@ -1,4 +1,5 @@
 from os.path import join
+from os import listdir
 import numpy as np
 
 
@@ -19,6 +20,10 @@ class Reader:
             # convert read input into useful filestructure
             file_list = file_content.split()
             return file_list
+
+    def get_files_like(self, prefix):
+        file_list = [file for file in listdir(self.directory) if file.startswith(prefix)]
+        return file_list
 
     def get_order(self):
         return self.order
